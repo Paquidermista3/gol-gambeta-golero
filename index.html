@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#08192d">
+<title>Gol Gambeta Golero</title>
+<style>
+*{box-sizing:border-box}
+body{background:#08192d;color:white;font-family:system-ui;margin:0;padding:20px}
+main{max-width:650px;margin:auto}
+h1{font-size:38px;line-height:.95;margin:20px 0}
+h1 b{color:#c1ff00}
+h2{font-size:21px}
+button,input,textarea,select{font:inherit;border-radius:10px;padding:12px;margin:5px 0}
+input,textarea,select{width:100%;background:#173451;color:white;border:1px solid #52677d}
+button{background:#c1ff00;color:#08192d;border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.35;cursor:default}
+.panel{background:#102840;padding:16px;border-radius:15px;margin:15px 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.tile{background:#173451;color:#c1ff00;font-size:28px;min-height:65px;width:100%}
+.bonus{background:#e8bf62;width:100%}
+.score{font-size:32px;color:#c1ff00;font-weight:bold}
+small{color:#aab9ce}
+[hidden]{display:none!important}
+#message{color:#ffca75;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<main>
+<h1><b>G</b>OL<br><b>G</b>AMBETA<br><b>G</b>OLERO</h1>
+<small>EL DESAFÍO FUTBOLÍSTICO</small>
+
+<section id="login" class="panel">
+<h2>Ingresar al juego</h2>
+<select id="role">
+<option value="conductor">Conductor</option>
+<option value="negro">Negro</option>
+<option value="flaco">Flaco</option>
+<option value="gordis">Gordis</option>
+</select>
+<input id="password" type="password" placeholder="Contraseña">
+<button id="enter">Ingresar</button>
+</section>
+
+<section id="game" hidden>
+<p id="identity"></p>
+<button id="logout">Cerrar sesión</button>
+<div id="scores" class="panel grid"></div>
+<div class="panel">
+<div id="board" class="grid"></div>
+<button id="bonus" class="bonus">BONUS · 10 PUNTOS</button>
+</div>
+<div class="panel">
+<h2 id="question">Esperando al conductor...</h2>
+<div id="clock"></div>
+<div id="player" hidden>
+<input id="response" maxlength="300" placeholder="Tu respuesta">
+<button id="send">Enviar respuesta</button>
+<p id="sent"></p>
+</div>
+</div>
+<section id="host" hidden>
+<div class="panel">
+<h2>Panel del conductor</h2>
+<p id="selected"></p>
+<textarea id="prompt" placeholder="Escribí la pregunta"></textarea>
+<input id="solution" placeholder="Respuestas válidas separadas por |">
+<input id="seconds" type="number" value="30" min="5" max="300">
+<button id="open">Abrir pregunta</button>
+<button id="close">Cerrar y corregir</button>
+<div id="answers"></div>
+</div>
+<button id="reset">Nueva partida</button>
+</section>
+</section>
+<p id="message"></p>
+</main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import {getFirestore,doc,collection,setDoc,getDoc,getDocs,onSnapshot,serverTimestamp,Timestamp,runTransaction} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyBRm3fWKSPeUrBHssoWGOJIiLMCedGW7a8",
+authDomain:"gol-gambeta-golero.firebaseapp.com",
+projectId:"gol-gambeta-golero",
+storageBucket:"gol-gambeta-golero.firebasestorage.app",
+messagingSenderId:"193720348697",
+appId:"1:193720348697:web:d82e064d08426726d3fa88"
+});
+
+const auth=getAuth(app),db=getFirestore(app);
+const hostUID="z6LqXbHCxTVqAphhooRJTgQEPvj1";
+const players={
+"rmjRhJTZahRJJbIhQoUWX3iuMlS2":"Negro",
+"I0fHIKrrgPTX7g7n3RJJlmueFsi1":"Flaco",
+"7WqPOGLpoeQlOCM6UKJf78UPUtk2":"Gordis"
+};
+const $=id=>document.getElementById(id);
+let user,host=false,state={},gameRef,selected=null;
+let unsub=[],busy=false;
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^\p{L}\p{N} ]/gu,"").trim().replace(/\s+/g," ");
+const fail=e=>$("message").textContent=e.message;
+function action(id,fn){
+$(id).onclick=async()=>{
+if(busy)return;
+busy=true;
+$("message").textContent="";
+try{await fn()}catch(e){fail(e)}
+finally{busy=false}
+};
+}
+
+const lobby=doc(db,"games","lobby");
+
+action("enter",async()=>{
+await signInWithEmailAndPassword(auth,$("role").value+"@ggg.example",$("password").value);
+$("password").value="";
+});
+action("logout",()=>signOut(auth));
+
+function choose(category,points){
+selected={category,points,key:category+"-"+points};
+$("selected").textContent=category+" · "+points+" puntos";
+}
+
+function board(){
+$("board").replaceChildren();
+for(const c of ["Gol","Gambeta","Golero"]){
+const h=document.createElement("strong");
+h.textContent=c;
+$("board").append(h);
+}
+for(const p of [1,3,5]){
+for(const c of ["Gol","Gambeta","Golero"]){
+const b=document.createElement("button");
+b.className="tile";
+b.textContent=p;
+b.disabled=!host||state.status==="open"||(state.used||[]).includes(c+"-"+p);
+b.onclick=()=>choose(c,p);
+$("board").append(b);
+}}
+$("bonus").disabled=!host||state.status==="open"||(state.used||[]).includes("Bonus-10");
+}
+$("bonus").onclick=()=>choose("Bonus",10);
+
+function render(){
+$("scores").replaceChildren();
+for(const name of Object.values(players)){
+const box=document.createElement("div");
+const label=document.createElement("div");
+label.textContent=name;
+const score=document.createElement("div");
+score.className="score";
+score.textContent=state.scores?.[name]||0;
+box.append(label,score);
+$("scores").append(box);
+}
+$("question").textContent=state.prompt||"Esperando al conductor...";
+$("player").hidden=host||state.status!=="open";
+board();
+}
+
+let stopGame=()=>{},stopAnswers=()=>{};
+onAuthStateChanged(auth,async u=>{
+unsub.forEach(f=>f());
+unsub=[];
+stopGame();stopAnswers();
+state={};selected=null;gameRef=null;
+user=u;
+$("login").hidden=!!u;
+$("game").hidden=!u;
+if(!u)return;
+host=u.uid===hostUID;
+if(!host&&!players[u.uid]){
+await signOut(auth);return;
+}
+$("identity").textContent=host?"Conductor":players[u.uid];
+$("host").hidden=!host;
+unsub.push(onSnapshot(lobby,s=>{
+stopGame();stopAnswers();
+if(!s.exists()){
+$("question").textContent="Esperando una nueva partida";
+return;
+}
+gameRef=doc(db,"games",s.data().gameId);
+stopGame=onSnapshot(gameRef,g=>{
+const old=state.activeQuestionId;
+state=g.data()||{};
+if(old!==state.activeQuestionId){
+$("sent").textContent="";
+$("response").value="";
+$("answers").replaceChildren();
+}
+render();
+},fail);
+if(host){
+stopAnswers=onSnapshot(collection(gameRef,"answers"),snap=>{
+showAnswers(snap.docs);
+},fail);
+}
+},fail));
+});
+
+function showAnswers(docs){
+$("answers").replaceChildren();
+for(const d of docs){
+const a=d.data();
+if(a.questionId!==state.activeQuestionId)continue;
+const p=document.createElement("p");
+p.textContent=players[a.uid]+": "+a.answer;
+$("answers").append(p);
+}
+}
+
+action("reset",async()=>{
+if(!host||!confirm("¿Crear una partida nueva?"))return;
+const id=crypto.randomUUID();
+const ref=doc(db,"games",id);
+await setDoc(ref,{
+status:"waiting",prompt:"Elegí una categoría",
+scores:{Negro:0,Flaco:0,Gordis:0},used:[]
+});
+await setDoc(lobby,{gameId:id});
+});
+
+action("open",async()=>{
+if(!host||!gameRef||!selected)throw Error("Creá una partida y elegí una categoría.");
+const prompt=$("prompt").value.trim();
+const solutions=$("solution").value.split("|").map(norm).filter(Boolean);
+const seconds=Number($("seconds").value);
+if(!prompt||!solutions.length||seconds<5||seconds>300)
+throw Error("Completá pregunta, solución y tiempo válido.");
+const id=crypto.randomUUID();
+await runTransaction(db,async tx=>{
+const g=(await tx.get(gameRef)).data();
+if(g.status==="open"||g.used.includes(selected.key))
+throw Error("Pregunta abierta o categoría ya utilizada.");
+tx.set(doc(db,"questions",id),{solutions});
+tx.update(gameRef,{
+status:"open",prompt,activeQuestionId:id,
+points:selected.points,activeKey:selected.key,
+deadline:Timestamp.fromMillis(Date.now()+seconds*1000)
+});
+});
+$("prompt").value="";
+$("solution").value="";
+});
+
+action("send",async()=>{
+if(host||!gameRef||state.status!=="open")return;
+const answer=$("response").value.trim();
+if(!answer)return;
+await setDoc(doc(gameRef,"answers",state.activeQuestionId+"_"+user.uid),{
+uid:user.uid,questionId:state.activeQuestionId,
+answer,submittedAt:serverTimestamp()
+});
+$("sent").textContent="Respuesta enviada";
+$("response").value="";
+});
+
+action("close",async()=>{
+if(!host||!gameRef||!state.activeQuestionId)return;
+const id=state.activeQuestionId;
+await runTransaction(db,async tx=>{
+const g=(await tx.get(gameRef)).data();
+if(g.status!=="open"||g.activeQuestionId!==id)
+throw Error("La pregunta ya está cerrada.");
+tx.update(gameRef,{status:"grading"});
+});
+const q=await getDoc(doc(db,"questions",id));
+const valid=q.data().solutions;
+const snap=await getDocs(collection(gameRef,"answers"));
+const results=snap.docs.map(d=>d.data()).filter(a=>a.questionId===id);
+const awards={};
+for(const a of results){
+const correct=valid.includes(norm(a.answer));
+awards[players[a.uid]]=confirm(
+players[a.uid]+": "+a.answer+
+"\nCorrección automática: "+(correct?"CORRECTA":"INCORRECTA")+
+"\nSolución: "+valid.join(" / ")+
+"\n¿Otorgar los puntos?"
+);
+}
+await runTransaction(db,async tx=>{
+const g=(await tx.get(gameRef)).data();
+if(g.status!=="grading"||g.activeQuestionId!==id)return;
+const scores={...g.scores};
+for(const n in awards)if(awards[n])scores[n]+=g.points;
+tx.update(gameRef,{
+scores,status:"closed",
+used:[...g.used,g.activeKey]
+});
+});
+});
+
+setInterval(()=>{
+const remaining=Math.max(0,Math.ceil(((state.deadline?.toMillis()||0)-Date.now())/1000));
+$("clock").textContent=state.status==="open"?"Tiempo: "+remaining+" s":"";
+$("send").disabled=remaining===0||!!$("sent").textContent;
+},250);
+</script>
+</body>
+</html>
