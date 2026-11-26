@@ -1,308 +1,39 @@
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#08192d">
-<title>Gol Gambeta Golero</title>
-<style>
-*{box-sizing:border-box}
-body{background:#08192d;color:white;font-family:system-ui;margin:0;padding:20px}
-main{max-width:650px;margin:auto}
-h1{font-size:38px;line-height:.95;margin:20px 0}
-h1 b{color:#c1ff00}
-h2{font-size:21px}
-button,input,textarea,select{font:inherit;border-radius:10px;padding:12px;margin:5px 0}
-input,textarea,select{width:100%;background:#173451;color:white;border:1px solid #52677d}
-button{background:#c1ff00;color:#08192d;border:0;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.35;cursor:default}
-.panel{background:#102840;padding:16px;border-radius:15px;margin:15px 0}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.tile{background:#173451;color:#c1ff00;font-size:28px;min-height:65px;width:100%}
-.bonus{background:#e8bf62;width:100%}
-.score{font-size:32px;color:#c1ff00;font-weight:bold}
-small{color:#aab9ce}
-[hidden]{display:none!important}
-#message{color:#ffca75;white-space:pre-wrap}
-</style>
-</head>
-<body>
-<main>
-<h1><b>G</b>OL<br><b>G</b>AMBETA<br><b>G</b>OLERO</h1>
-<small>EL DESAFÍO FUTBOLÍSTICO</small>
-
-<section id="login" class="panel">
-<h2>Ingresar al juego</h2>
-<select id="role">
-<option value="conductor">Conductor</option>
-<option value="negro">Negro</option>
-<option value="flaco">Flaco</option>
-<option value="gordis">Gordis</option>
-</select>
-<input id="password" type="password" placeholder="Contraseña">
-<button id="enter">Ingresar</button>
-</section>
-
-<section id="game" hidden>
-<p id="identity"></p>
-<button id="logout">Cerrar sesión</button>
-<div id="scores" class="panel grid"></div>
-<div class="panel">
-<div id="board" class="grid"></div>
-<button id="bonus" class="bonus">BONUS · 10 PUNTOS</button>
-</div>
-<div class="panel">
-<h2 id="question">Esperando al conductor...</h2>
-<div id="clock"></div>
-<div id="player" hidden>
-<input id="response" maxlength="300" placeholder="Tu respuesta">
-<button id="send">Enviar respuesta</button>
-<p id="sent"></p>
-</div>
-</div>
-<section id="host" hidden>
-<div class="panel">
-<h2>Panel del conductor</h2>
-<p id="selected"></p>
-<textarea id="prompt" placeholder="Escribí la pregunta"></textarea>
-<input id="solution" placeholder="Respuestas válidas separadas por |">
-<input id="seconds" type="number" value="30" min="5" max="300">
-<button id="open">Abrir pregunta</button>
-<button id="close">Cerrar y corregir</button>
-<div id="answers"></div>
-</div>
-<button id="reset">Nueva partida</button>
-</section>
-</section>
-<p id="message"></p>
-</main>
-
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gol Gambeta Golero 2.0</title><style>
+*{box-sizing:border-box}body{margin:0;background:#08192d;color:#fff;font:16px system-ui}main{max-width:850px;margin:auto;padding:16px}h1{font-size:clamp(28px,6vw,48px);line-height:1;color:#c1ff00;margin:12px 0}small{color:#aab9ce}section,.panel{background:#102840;padding:16px;border-radius:16px;margin:12px 0}button,input,select,textarea{font:inherit;border-radius:10px;padding:12px;margin:5px 0}button{background:#c1ff00;color:#08192d;border:0;font-weight:800;cursor:pointer}button:disabled{opacity:.35}input,select,textarea{width:100%;background:#173451;color:white;border:1px solid #52677d}textarea{min-height:80px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.tile{background:#173451;color:#c1ff00;font-size:28px;min-height:65px}.bonus{background:#e8bf62;width:100%}.score{font-size:32px;color:#c1ff00;font-weight:900}.sticky{position:sticky;top:0;z-index:2;box-shadow:0 4px 12px #0005}.clock{font-size:38px;font-weight:900;text-align:center;color:#c1ff00}progress{width:100%;accent-color:#c1ff00}.used{text-decoration:line-through}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row button{flex:1}.answer{padding:10px;border-bottom:1px solid #52677d}#message{color:#ffca75;white-space:pre-wrap}[hidden]{display:none!important}#podium{text-align:center;font-size:24px;color:#e8bf62}#question{font-size:clamp(22px,4vw,32px)}
+</style><main><h1>GOL · GAMBETA · GOLERO</h1><small>EL DESAFÍO FUTBOLÍSTICO / 2.0</small><section id="login"><h2>Ingresar</h2><select id="role"><option value="conductor">Conductor</option><option value="negro">Negro</option><option value="flaco">Flaco</option><option value="gordis">Gordis</option></select><input id="password" type="password" placeholder="Contraseña"><button id="enter">Ingresar</button></section><div id="game" hidden><div class="row"><strong id="identity"></strong><small id="connection"></small><button id="logout">Salir</button></div><div id="scores" class="panel grid sticky"></div><div class="panel"><small id="round"></small><div id="board" class="grid"></div><button id="bonus" class="bonus">★ BONUS · 10 PUNTOS</button></div><div class="panel"><small id="category"></small><h2 id="question">Esperando una partida</h2><div id="clock" class="clock"></div><progress id="bar" hidden></progress><p id="reveal"></p><div id="player" hidden><input id="response" maxlength="300" placeholder="Tu respuesta"><button id="send">Enviar respuesta</button><p id="sent"></p></div><div id="podium"></div></div><div id="host" hidden><section><h2>Control del conductor</h2><p id="selected">Elegí una casilla</p><button id="random">Otra pregunta del banco</button><textarea id="prompt" placeholder="Pregunta"></textarea><input id="solution" placeholder="Respuestas válidas separadas por |"><label>Tiempo (segundos)</label><input id="seconds" type="number" value="30" min="5" max="300"><div class="row"><button id="open">Abrir pregunta</button><button id="close">Cerrar y corregir</button></div><div id="answers"></div><button id="grade" hidden>Confirmar puntuación</button></section><button id="reset">Nueva partida</button></div></div><p id="message" role="alert"></p></main>
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
-import {getFirestore,doc,collection,setDoc,getDoc,getDocs,onSnapshot,serverTimestamp,Timestamp,runTransaction} from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
-
-const app=initializeApp({
-apiKey:"AIzaSyBRm3fWKSPeUrBHssoWGOJIiLMCedGW7a8",
-authDomain:"gol-gambeta-golero.firebaseapp.com",
-projectId:"gol-gambeta-golero",
-storageBucket:"gol-gambeta-golero.firebasestorage.app",
-messagingSenderId:"193720348697",
-appId:"1:193720348697:web:d82e064d08426726d3fa88"
-});
-
-const auth=getAuth(app),db=getFirestore(app);
-const hostUID="z6LqXbHCxTVqAphhooRJTgQEPvj1";
-const players={
-"rmjRhJTZahRJJbIhQoUWX3iuMlS2":"Negro",
-"I0fHIKrrgPTX7g7n3RJJlmueFsi1":"Flaco",
-"7WqPOGLpoeQlOCM6UKJf78UPUtk2":"Gordis"
-};
-const $=id=>document.getElementById(id);
-let user,host=false,state={},gameRef,selected=null;
-let unsub=[],busy=false;
-const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^\p{L}\p{N} ]/gu,"").trim().replace(/\s+/g," ");
-const fail=e=>$("message").textContent=e.message;
-function action(id,fn){
-$(id).onclick=async()=>{
-if(busy)return;
-busy=true;
-$("message").textContent="";
-try{await fn()}catch(e){fail(e)}
-finally{busy=false}
-};
-}
-
-const lobby=doc(db,"games","lobby");
-
-action("enter",async()=>{
-await signInWithEmailAndPassword(auth,$("role").value+"@ggg.example",$("password").value);
-$("password").value="";
-});
-action("logout",()=>signOut(auth));
-
-function choose(category,points){
-selected={category,points,key:category+"-"+points};
-$("selected").textContent=category+" · "+points+" puntos";
-}
-
-function board(){
-$("board").replaceChildren();
-for(const c of ["Gol","Gambeta","Golero"]){
-const h=document.createElement("strong");
-h.textContent=c;
-$("board").append(h);
-}
-for(const p of [1,3,5]){
-for(const c of ["Gol","Gambeta","Golero"]){
-const b=document.createElement("button");
-b.className="tile";
-b.textContent=p;
-b.disabled=!host||state.status==="open"||(state.used||[]).includes(c+"-"+p);
-b.onclick=()=>choose(c,p);
-$("board").append(b);
-}}
-$("bonus").disabled=!host||state.status==="open"||(state.used||[]).includes("Bonus-10");
-}
-$("bonus").onclick=()=>choose("Bonus",10);
-
-function render(){
-$("scores").replaceChildren();
-for(const name of Object.values(players)){
-const box=document.createElement("div");
-const label=document.createElement("div");
-label.textContent=name;
-const score=document.createElement("div");
-score.className="score";
-score.textContent=state.scores?.[name]||0;
-box.append(label,score);
-$("scores").append(box);
-}
-$("question").textContent=state.prompt||"Esperando al conductor...";
-$("player").hidden=host||state.status!=="open";
-board();
-}
-
-let stopGame=()=>{},stopAnswers=()=>{};
-onAuthStateChanged(auth,async u=>{
-unsub.forEach(f=>f());
-unsub=[];
-stopGame();stopAnswers();
-state={};selected=null;gameRef=null;
-user=u;
-$("login").hidden=!!u;
-$("game").hidden=!u;
-if(!u)return;
-host=u.uid===hostUID;
-if(!host&&!players[u.uid]){
-await signOut(auth);return;
-}
-$("identity").textContent=host?"Conductor":players[u.uid];
-$("host").hidden=!host;
-unsub.push(onSnapshot(lobby,s=>{
-stopGame();stopAnswers();
-if(!s.exists()){
-$("question").textContent="Esperando una nueva partida";
-return;
-}
-gameRef=doc(db,"games",s.data().gameId);
-stopGame=onSnapshot(gameRef,g=>{
-const old=state.activeQuestionId;
-state=g.data()||{};
-if(old!==state.activeQuestionId){
-$("sent").textContent="";
-$("response").value="";
-$("answers").replaceChildren();
-}
-render();
-},fail);
-if(host){
-stopAnswers=onSnapshot(collection(gameRef,"answers"),snap=>{
-showAnswers(snap.docs);
-},fail);
-}
-},fail));
-});
-
-function showAnswers(docs){
-$("answers").replaceChildren();
-for(const d of docs){
-const a=d.data();
-if(a.questionId!==state.activeQuestionId)continue;
-const p=document.createElement("p");
-p.textContent=players[a.uid]+": "+a.answer;
-$("answers").append(p);
-}
-}
-
-action("reset",async()=>{
-if(!host||!confirm("¿Crear una partida nueva?"))return;
-const id=crypto.randomUUID();
-const ref=doc(db,"games",id);
-await setDoc(ref,{
-status:"waiting",prompt:"Elegí una categoría",
-scores:{Negro:0,Flaco:0,Gordis:0},used:[]
-});
-await setDoc(lobby,{gameId:id});
-});
-
-action("open",async()=>{
-if(!host||!gameRef||!selected)throw Error("Creá una partida y elegí una categoría.");
-const prompt=$("prompt").value.trim();
-const solutions=$("solution").value.split("|").map(norm).filter(Boolean);
-const seconds=Number($("seconds").value);
-if(!prompt||!solutions.length||seconds<5||seconds>300)
-throw Error("Completá pregunta, solución y tiempo válido.");
-const id=crypto.randomUUID();
-await runTransaction(db,async tx=>{
-const g=(await tx.get(gameRef)).data();
-if(g.status==="open"||g.used.includes(selected.key))
-throw Error("Pregunta abierta o categoría ya utilizada.");
-tx.set(doc(db,"questions",id),{solutions});
-tx.update(gameRef,{
-status:"open",prompt,activeQuestionId:id,
-points:selected.points,activeKey:selected.key,
-deadline:Timestamp.fromMillis(Date.now()+seconds*1000)
-});
-});
-$("prompt").value="";
-$("solution").value="";
-});
-
-action("send",async()=>{
-if(host||!gameRef||state.status!=="open")return;
-const answer=$("response").value.trim();
-if(!answer)return;
-await setDoc(doc(gameRef,"answers",state.activeQuestionId+"_"+user.uid),{
-uid:user.uid,questionId:state.activeQuestionId,
-answer,submittedAt:serverTimestamp()
-});
-$("sent").textContent="Respuesta enviada";
-$("response").value="";
-});
-
-action("close",async()=>{
-if(!host||!gameRef||!state.activeQuestionId)return;
-const id=state.activeQuestionId;
-await runTransaction(db,async tx=>{
-const g=(await tx.get(gameRef)).data();
-if(g.status!=="open"||g.activeQuestionId!==id)
-throw Error("La pregunta ya está cerrada.");
-tx.update(gameRef,{status:"grading"});
-});
-const q=await getDoc(doc(db,"questions",id));
-const valid=q.data().solutions;
-const snap=await getDocs(collection(gameRef,"answers"));
-const results=snap.docs.map(d=>d.data()).filter(a=>a.questionId===id);
-const awards={};
-for(const a of results){
-const correct=valid.includes(norm(a.answer));
-awards[players[a.uid]]=confirm(
-players[a.uid]+": "+a.answer+
-"\nCorrección automática: "+(correct?"CORRECTA":"INCORRECTA")+
-"\nSolución: "+valid.join(" / ")+
-"\n¿Otorgar los puntos?"
-);
-}
-await runTransaction(db,async tx=>{
-const g=(await tx.get(gameRef)).data();
-if(g.status!=="grading"||g.activeQuestionId!==id)return;
-const scores={...g.scores};
-for(const n in awards)if(awards[n])scores[n]+=g.points;
-tx.update(gameRef,{
-scores,status:"closed",
-used:[...g.used,g.activeKey]
-});
-});
-});
-
-setInterval(()=>{
-const remaining=Math.max(0,Math.ceil(((state.deadline?.toMillis()||0)-Date.now())/1000));
-$("clock").textContent=state.status==="open"?"Tiempo: "+remaining+" s":"";
-$("send").disabled=remaining===0||!!$("sent").textContent;
-},250);
-</script>
-</body>
-</html>
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
+import {getFirestore,doc,collection,setDoc,getDoc,getDocs,onSnapshot,serverTimestamp,Timestamp,runTransaction} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
+const app=initializeApp({apiKey:'AIzaSyBRm3fWKSPeUrBHssoWGOJIiLMCedGW7a8',authDomain:'gol-gambeta-golero.firebaseapp.com',projectId:'gol-gambeta-golero',storageBucket:'gol-gambeta-golero.firebasestorage.app',messagingSenderId:'193720348697',appId:'1:193720348697:web:d82e064d08426726d3fa88'});
+const auth=getAuth(app),db=getFirestore(app),hostUID='z6LqXbHCxTVqAphhooRJTgQEPvj1',players={'rmjRhJTZahRJJbIhQoUWX3iuMlS2':'Negro','I0fHIKrrgPTX7g7n3RJJlmueFsi1':'Flaco','7WqPOGLpoeQlOCM6UKJf78UPUtk2':'Gordis'},lobby=doc(db,'games','lobby'),$=id=>document.getElementById(id);
+const bank={
+'Gol-1':[['¿Quién ganó el Mundial 2010?','España'],['¿Quién ganó el Mundial 2014?','Alemania']],
+'Gol-3':[['¿Quién marcó el gol de la final del Mundial 2014?','Mario Götze|Gotze'],['¿Quién marcó el gol de la final del Mundial 2010?','Andrés Iniesta|Iniesta']],
+'Gol-5':[['¿Qué selección eliminó a Brasil en cuartos del Mundial 2006?','Francia'],['¿Qué selección eliminó a Argentina en octavos del Mundial 1994?','Rumania|Rumanía']],
+'Gambeta-1':[['¿En qué club debutó profesionalmente Lionel Messi?','Barcelona|FC Barcelona'],['¿En qué club argentino debutó Maradona?','Argentinos Juniors|Argentinos']],
+'Gambeta-3':[['¿Qué jugador ganó la Champions con Ajax, Real Madrid y Milan?','Clarence Seedorf|Seedorf'],['¿Qué entrenador ganó el Mundial 2006?','Marcello Lippi|Lippi']],
+'Gambeta-5':[['¿Qué club ganó la primera Champions bajo ese nombre en 1993?','Olympique de Marsella|Marsella|Marseille'],['¿Qué jugador ganó el Balón de Oro 1995?','George Weah|Weah']],
+'Golero-1':[['¿Quién fue el arquero titular argentino en la final del Mundial 2022?','Emiliano Martínez|Dibu Martínez|Dibu'],['¿Quién fue el arquero titular de España en la final de 2010?','Iker Casillas|Casillas']],
+'Golero-3':[['¿Qué arquero ganó el Balón de Oro en 1963?','Lev Yashin|Yashin|Yashin'],['¿Qué arquero fue capitán de Italia en la final de 1982?','Dino Zoff|Zoff']],
+'Golero-5':[['¿Qué arquero atajó para Paraguay en el Mundial 1998 y era famoso por sus tiros libres?','José Luis Chilavert|Chilavert'],['¿Qué arquero ganó el premio al mejor guardameta del Mundial 1994?','Michel Preud’homme|Michel Preudhomme|Preudhomme']],
+'Bonus-10':[['¿Quién ganó tres Mundiales como jugador?','Pelé|Edson Arantes do Nascimento'],['¿Qué selección ganó la Eurocopa 1992?','Dinamarca']]};
+let user,host=false,state={},gameRef,selected,busy=false,stopLobby=()=>{},stopGame=()=>{},stopAnswers=()=>{},answerDocs=[],gradingId=null,submitted=false,bankIndex={},audio,lastTick=null;
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').trim().replace(/\s+/g,' ');const fail=e=>$('message').textContent=e.message;const locked=()=>['open','grading'].includes(state.status);function beep(freq=600){try{audio ||= new (window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=freq;g.gain.value=.035;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.12)}catch{}}function action(id,fn){$(id).onclick=async()=>{if(busy)return;busy=true;$('message').textContent='';try{await fn()}catch(e){fail(e)}finally{busy=false}}}
+action('enter',async()=>{beep();await signInWithEmailAndPassword(auth,$('role').value+'@ggg.example',$('password').value);$('password').value=''});action('logout',()=>signOut(auth));
+function loadQuestion(next=false){if(!selected)return;const list=bank[selected.key];let i=bankIndex[selected.key]??Math.floor(Math.random()*list.length);if(next)i=(i+1)%list.length;bankIndex[selected.key]=i;[$('prompt').value,$('solution').value]=list[i]}
+function choose(c,p){selected={category:c,points:p,key:c+'-'+p};$('selected').textContent=c+' · '+p+' puntos';loadQuestion();$('prompt').focus()}
+action('random',()=>loadQuestion(true));
+function board(){ $('board').replaceChildren();for(const c of ['Gol','Gambeta','Golero']){const h=document.createElement('strong');h.textContent=c;$('board').append(h)}for(const p of [1,3,5])for(const c of ['Gol','Gambeta','Golero']){const b=document.createElement('button'),used=(state.used||[]).includes(c+'-'+p);b.className='tile'+(used?' used':'');b.textContent=used?'✓':p;b.disabled=!host||!gameRef||locked()||used;b.onclick=()=>choose(c,p);$('board').append(b)}$('bonus').disabled=!host||!gameRef||locked()||(state.used||[]).includes('Bonus-10')}
+$('bonus').onclick=()=>choose('Bonus',10);
+function render(){const scores=Object.entries(state.scores||{Negro:0,Flaco:0,Gordis:0}).sort((a,b)=>b[1]-a[1]);$('scores').replaceChildren();for(const [name,points] of scores){const d=document.createElement('div'),n=document.createElement('strong'),s=document.createElement('div');n.textContent=name;s.className='score';s.textContent=points;d.append(n,s);$('scores').append(d)}$('round').textContent=`FECHA · ${state.used?.length||0}/10 preguntas completadas`;$('question').textContent=state.prompt||'Esperando una partida';$('category').textContent=state.activeKey||'';$('player').hidden=host||state.status!=='open';$('reveal').textContent=state.status==='closed'&&state.reveal?'Solución: '+state.reveal:'';$('open').disabled=locked();$('close').disabled=state.status!=='open';$('reset').disabled=locked();$('podium').textContent=state.used?.length===10?'🏆 '+scores.filter(x=>x[1]===scores[0][1]).map(x=>x[0]).join(' y ')+' · '+scores[0][1]+' puntos':'';board();if(host)showAnswers()}
+function showAnswers(){if(state.status==='grading')return;const el=$('answers');el.replaceChildren();for(const a of answerDocs.filter(a=>a.questionId===state.activeQuestionId)){const p=document.createElement('p');p.textContent=players[a.uid]+': '+a.answer;el.append(p)}$('grade').hidden=true}
+onAuthStateChanged(auth,async u=>{stopLobby();stopGame();stopAnswers();state={};gameRef=null;selected=null;answerDocs=[];gradingId=null;submitted=false;user=u;$('login').hidden=!!u;$('game').hidden=!u;if(!u)return;host=u.uid===hostUID;if(!host&&!players[u.uid]){await signOut(auth);return}$('identity').textContent=host?'Conductor':players[u.uid];$('host').hidden=!host;render();stopLobby=onSnapshot(lobby,s=>{stopGame();stopAnswers();if(!s.exists()){gameRef=null;state={};render();return}gameRef=doc(db,'games',s.data().gameId);stopGame=onSnapshot(gameRef,g=>{const old=state.activeQuestionId;state=g.data()||{};$('connection').textContent=g.metadata.fromCache?'Sin conexión / caché':'● Conectado';if(old!==state.activeQuestionId){submitted=false;gradingId=null;$('sent').textContent='';$('response').value='';$('answers').replaceChildren();if(!host&&state.activeQuestionId)getDoc(doc(gameRef,'answers',state.activeQuestionId+'_'+user.uid)).then(d=>{if(d.exists()&&d.data().questionId===state.activeQuestionId){submitted=true;$('sent').textContent='Respuesta enviada'}}).catch(()=>{})}render();if(host&&state.status==='grading')prepareGrade().catch(fail)},fail);if(host)stopAnswers=onSnapshot(collection(gameRef,'answers'),s=>{answerDocs=s.docs.map(d=>d.data());showAnswers()},fail)},fail)});
+action('reset',async()=>{if(!host||locked()||!confirm('¿Crear una partida nueva?'))return;const id=crypto.randomUUID();await setDoc(doc(db,'games',id),{status:'waiting',prompt:'Elegí una categoría',scores:{Negro:0,Flaco:0,Gordis:0},used:[]});await setDoc(lobby,{gameId:id});selected=null;$('selected').textContent='Elegí una casilla';$('prompt').value='';$('solution').value=''});
+action('open',async()=>{if(!host||!gameRef||!selected)throw Error('Creá una partida y elegí una categoría.');const prompt=$('prompt').value.trim(),solutions=$('solution').value.split('|').map(norm).filter(Boolean),seconds=Number($('seconds').value),choice={...selected},id=crypto.randomUUID();if(!prompt||!solutions.length||!Number.isFinite(seconds)||seconds<5||seconds>300)throw Error('Completá los campos.');await runTransaction(db,async tx=>{const g=(await tx.get(gameRef)).data();if(['open','grading'].includes(g.status)||g.used.includes(choice.key))throw Error('Casilla no disponible.');tx.set(doc(db,'questions',id),{solutions});tx.update(gameRef,{status:'open',prompt,activeQuestionId:id,points:choice.points,activeKey:choice.key,deadline:Timestamp.fromMillis(Date.now()+seconds*1000),duration:seconds,reveal:''})});selected=null;$('selected').textContent='Pregunta abierta';$('prompt').value='';$('solution').value='';beep(800)});
+action('send',async()=>{if(host||!gameRef||state.status!=='open'||submitted||Date.now()>=state.deadline.toMillis())return;const answer=$('response').value.trim();if(!answer)return;await setDoc(doc(gameRef,'answers',state.activeQuestionId+'_'+user.uid),{uid:user.uid,questionId:state.activeQuestionId,answer,submittedAt:serverTimestamp()});submitted=true;$('sent').textContent='Respuesta enviada';$('response').value='';beep()});
+action('close',async()=>{if(!host||!gameRef)return;const id=state.activeQuestionId;await runTransaction(db,async tx=>{const g=(await tx.get(gameRef)).data();if(g.status!=='open'||g.activeQuestionId!==id)throw Error('Pregunta cerrada.');tx.update(gameRef,{status:'grading'})});await prepareGrade()});
+let valid=[],awards={};async function prepareGrade(){const id=state.activeQuestionId;if(!host||state.status!=='grading'||gradingId===id)return;gradingId=id;try{const q=await getDoc(doc(db,'questions',id)),snap=await getDocs(collection(gameRef,'answers'));if(state.activeQuestionId!==id)return;valid=q.data().solutions;awards={};$('answers').replaceChildren();const heading=document.createElement('p');heading.textContent='Solución: '+valid.join(' / ');$('answers').append(heading);for(const [uid,name] of Object.entries(players)){const a=snap.docs.map(d=>d.data()).find(a=>a.questionId===id&&a.uid===uid),row=document.createElement('div');row.className='answer';const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.style.width='auto';check.checked=!!a&&valid.includes(norm(a.answer));check.disabled=!a;awards[name]=check.checked;check.onchange=()=>awards[name]=check.checked;label.append(check,document.createTextNode(' '+name+': '+(a?.answer||'Sin respuesta')));row.append(label);$('answers').append(row)}$('grade').hidden=false}catch(e){gradingId=null;throw e}}
+action('grade',async()=>{if(!host||state.status!=='grading'||gradingId!==state.activeQuestionId)return;const id=gradingId,chosen={...awards},solution=valid.join(' / ');await runTransaction(db,async tx=>{const g=(await tx.get(gameRef)).data();if(g.status!=='grading'||g.activeQuestionId!==id)throw Error('Corrección ya realizada.');const scores={...g.scores};for(const n in chosen)if(chosen[n])scores[n]+=g.points;tx.update(gameRef,{scores,status:'closed',used:[...g.used,g.activeKey],reveal:solution})});beep(950)});
+setInterval(()=>{const open=state.status==='open',remaining=Math.max(0,Math.ceil(((state.deadline?.toMillis()||0)-Date.now())/1000));$('clock').textContent=open?(remaining?remaining+' s':'¡Tiempo!'):'';$('bar').hidden=!open;$('bar').max=state.duration||30;$('bar').value=remaining;$('send').disabled=!open||remaining===0||submitted;if(open&&remaining!==lastTick&&remaining<=5&&lastTick!==null)beep(remaining?440:220);lastTick=open?remaining:null},250);
+</script></html>
